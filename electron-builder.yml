@@ -1,0 +1,23 @@
+appId: com.scanhadir.admin
+productName: ScanHadir
+copyright: Copyright © 2025 ScanHadir
+directories:
+  output: dist
+  buildResources: resources
+files:
+  - from: .
+    filter:
+      - package.json
+      - app
+publish: null
+
+win:
+  target:
+    - target: msi
+      arch:
+        - x64
+  certificateFile: null
+  certificatePassword: null
+
+msi:
+  oneClick: false
