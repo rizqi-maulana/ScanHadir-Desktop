@@ -2,26 +2,26 @@ import path from 'path'
 import { app, ipcMain } from 'electron'
 import { createWindow } from './helpers'
 
-  ; (async () => {
-    await app.whenReady()
+    ; (async () => {
+        await app.whenReady()
 
-    const mainWindow = createWindow('main', {
-      width: 1000,
-      height: 600,
-      webPreferences: {
-        preload: path.join(__dirname, 'preload.js'),
-      },
-    })
+        const mainWindow = createWindow('main', {
+            width: 1000,
+            height: 600,
+            webPreferences: {
+                preload: path.join(__dirname, 'preload.js'),
+            },
+        })
 
-    // Function to load offline page
-    const loadOfflinePage = () => {
-      const offlineHTML = `
+        // Function to load offline page - NEW VERSION
+        const loadOfflinePage = () => {
+            const offlineHTML = `
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Maintenance - Offline</title>
+    <title>ScanHadir - Mode Offline</title>
     <style>
         :root {
             --primary: #007bff;
@@ -33,9 +33,9 @@ import { createWindow } from './helpers'
             --text-secondary: #6c757d;
             --text-muted: #adb5bd;
             --border-color: #dee2e6;
-            --success: #28a745;
-            --warning: #ffc107;
             --error: #dc3545;
+            --warning: #ffc107;
+            --success: #28a745;
             --white: #ffffff;
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             --radius: 0.5rem;
@@ -58,44 +58,9 @@ import { createWindow } from './helpers'
             padding: 1rem;
         }
 
-        @media (max-width: 767.98px) {
-            body::before {
-                content: "";
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background-color: rgba(0, 0, 0, 0.8);
-                z-index: 9998;
-            }
-
-            body::after {
-                content: "Aplikasi ini dioptimalkan untuk tablet dan komputer.\\nSilakan gunakan layar yang lebih besar.";
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background-color: var(--card-bg);
-                padding: 2rem;
-                border-radius: var(--radius);
-                box-shadow: var(--shadow);
-                color: var(--text-primary);
-                font-size: 1.125rem;
-                font-weight: 500;
-                text-align: center;
-                z-index: 9999;
-                white-space: pre-line;
-            }
-
-            .container {
-                display: none;
-            }
-        }
-
         .container {
             width: 100%;
-            max-width: 40rem;
+            max-width: 32rem; /* Lebih kecil untuk tampilan yang lebih ringkas */
             min-width: 20rem;
             margin: 0 auto;
             text-align: center;
@@ -106,35 +71,19 @@ import { createWindow } from './helpers'
         }
 
         .icon-circle {
-            width: 8rem;
-            height: 8rem;
+            width: 6rem; /* Sedikit kecilkan */
+            height: 6rem;
             background-color: var(--primary-light);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0 auto 1.5rem;
-            position: relative;
         }
 
-        .icon-circle::after {
-            content: '';
-            position: absolute;
-            inset: -0.5rem;
-            border-radius: 50%;
-            border: 2px solid var(--primary-light);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(0.95); opacity: 1; }
-            50% { transform: scale(1.05); opacity: 0.7; }
-            100% { transform: scale(0.95); opacity: 1; }
-        }
-
-        .wifi-icon {
-            width: 3rem;
-            height: 3rem;
+        .cloud-off-icon {
+            width: 2.5rem; /* Ukuran ikon */
+            height: 2.5rem;
             stroke: var(--primary);
             stroke-width: 1.5;
             fill: none;
@@ -143,17 +92,17 @@ import { createWindow } from './helpers'
         }
 
         h1 {
-            font-size: 1.875rem;
+            font-size: 1.5rem; /* Sedikit kecilkan */
             font-weight: 600;
             color: var(--text-primary);
             margin-bottom: 0.75rem;
         }
 
         .description {
-            font-size: 1.125rem;
+            font-size: 1rem; /* Ukuran font standar */
             color: var(--text-secondary);
-            margin-bottom: 2rem;
-            line-height: 1.6;
+            margin-bottom: 1.5rem; /* Sedikit kurangi jarak */
+            line-height: 1.5;
         }
 
         .status-badge {
@@ -190,7 +139,7 @@ import { createWindow } from './helpers'
             padding: 0.75rem 2rem;
             font-size: 0.875rem;
             font-weight: 500;
-            border-radius: 0.5rem;
+            border-radius: 9999px; /* Sekarang rounded-full */
             cursor: pointer;
             display: inline-flex;
             align-items: center;
@@ -233,13 +182,13 @@ import { createWindow } from './helpers'
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: var(--radius);
-            padding: 1.5rem;
+            padding: 1.25rem; /* Sedikit kurangi padding */
             text-align: left;
             box-shadow: var(--shadow);
         }
 
         .help-title {
-            font-size: 1rem;
+            font-size: 0.95rem; /* Sedikit kecilkan */
             font-weight: 600;
             color: var(--text-primary);
             margin-bottom: 1rem;
@@ -249,42 +198,56 @@ import { createWindow } from './helpers'
             list-style: none;
             display: flex;
             flex-direction: column;
-            gap: 0.75rem;
+            gap: 0.6rem; /* Sedikit kurangi gap */
         }
 
         .help-item {
             display: flex;
             align-items: flex-start;
-            gap: 0.75rem;
-            font-size: 0.875rem;
+            gap: 0.5rem; /* Sedikit kurangi gap */
+            font-size: 0.85rem; /* Sedikit kecilkan */
             color: var(--text-secondary);
         }
 
         .help-item::marker {
             content: "• ";
             color: var(--text-muted);
-            font-size: 1.25rem;
+            font-size: 1.1rem; /* Sedikit kecilkan */
             line-height: 0;
         }
+
+        /* Media Query untuk layar kecil (tablet, mobile) */
+        @media (max-width: 768px) {
+            .container {
+                max-width: 90%; /* Lebar lebih besar di layar kecil */
+            }
+
+            .retry-button {
+                 max-width: 100%; /* Tombol penuhi lebar */
+            }
+
+            .help-section {
+                padding: 1rem; /* Kurangi padding */
+            }
+        }
+
     </style>
 </head>
 <body>
     <div class="container">
         <div class="icon-wrapper">
             <div class="icon-circle">
-                <svg class="wifi-icon" viewBox="0 0 24 24">
-                    <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
-                    <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
-                    <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
-                    <line x1="12" y1="20" x2="12.01" y2="20"></line>
-                    <line x1="2" y1="2" x2="22" y2="22" stroke-width="2"></line>
+                <!-- Ikon Cloud Off -->
+                <svg class="cloud-off-icon" viewBox="0 0 24 24">
+                    <path d="M2.1 2.1a2.4 2.4 0 0 0 3.39 3.39M1 12a9 9 0 1 0 18 0M15 12a3 3 0 1 1-6 0"></path>
+                    <path d="m2 2 20 20" stroke-width="2"></path>
                 </svg>
             </div>
         </div>
 
-        <h1>Tidak Ada Koneksi Internet</h1>
+        <h1>Koneksi Terputus</h1>
         <p class="description">
-            Dashboard Maintenance memerlukan koneksi internet yang aktif. Silakan periksa koneksi Anda dan coba lagi.
+            Aplikasi memerlukan koneksi internet untuk mengakses dashboard. Silakan periksa koneksi Anda.
         </p>
 
         <div id="status" class="status-badge">
@@ -300,12 +263,12 @@ import { createWindow } from './helpers'
         </button>
 
         <div class="help-section">
-            <h3 class="help-title">Pemecahan Masalah Cepat</h3>
+            <h3 class="help-title">Cara Mengatasi:</h3>
             <ul class="help-list">
-                <li class="help-item">Periksa apakah WiFi atau data seluler Anda sudah aktif.</li>
-                <li class="help-item">Pastikan mode pesawat dinonaktifkan.</li>
-                <li class="help-item">Coba refresh halaman ini atau restart browser Anda.</li>
-                <li class="help-item">Periksa router Anda atau hubungi administrator jaringan.</li>
+                <li class="help-item">Pastikan WiFi atau data seluler aktif.</li>
+                <li class="help-item">Nonaktifkan mode pesawat.</li>
+                <li class="help-item">Restart router atau modem Anda.</li>
+                <li class="help-item">Cek pengaturan firewall atau proxy.</li>
             </ul>
         </div>
     </div>
@@ -332,7 +295,6 @@ import { createWindow } from './helpers'
         async function checkConnection() {
             retryBtn.disabled = true;
             btnText.textContent = 'Memeriksa...';
-            
             // Redirect to main URL
             window.location.href = 'https://admin.scanhadirku.id';
         }
@@ -358,39 +320,39 @@ import { createWindow } from './helpers'
 </body>
 </html>
     `
-      mainWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(offlineHTML)}`)
-    }
+            mainWindow.loadURL(`text/html;charset=utf-8,${encodeURIComponent(offlineHTML)}`)
+        }
 
-    // Try to load the main URL
-    try {
-      await mainWindow.loadURL('https://admin.scanhadirku.id')
-      mainWindow.webContents.closeDevTools()
-    } catch (error) {
-      // If loading fails, show offline page
-      loadOfflinePage()
-      console.error('Failed to load URL:', error)
-    }
+        // Try to load the main URL
+        try {
+            await mainWindow.loadURL('https://admin.scanhadirku.id')
+            mainWindow.webContents.closeDevTools()
+        } catch (error) {
+            // If loading fails, show offline page
+            loadOfflinePage()
+            console.error('Failed to load URL:', error)
+        }
 
-    // Listen for navigation failures (when internet disconnects)
-    mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
-      // Ignore aborted loads (errorCode -3)
-      if (errorCode !== -3) {
-        console.error('Failed to load:', errorCode, errorDescription)
-        loadOfflinePage()
-      }
-    })
+        // Listen for navigation failures (when internet disconnects)
+        mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
+            // Ignore aborted loads (errorCode -3)
+            if (errorCode !== -3) {
+                console.error('Failed to load:', errorCode, errorDescription)
+                loadOfflinePage()
+            }
+        })
 
-    // Optional: Add IPC handler to retry connection from renderer
-    ipcMain.on('retry-connection', async () => {
-      try {
-        await mainWindow.loadURL('https://admin.scanhadirku.id')
-      } catch (error) {
-        loadOfflinePage()
-      }
-    })
+        // Optional: Add IPC handler to retry connection from renderer
+        ipcMain.on('retry-connection', async () => {
+            try {
+                await mainWindow.loadURL('https://admin.scanhadirku.id')
+            } catch (error) {
+                loadOfflinePage()
+            }
+        })
 
-  })()
+    })()
 
 app.on('window-all-closed', () => {
-  app.quit()
+    app.quit()
 })
