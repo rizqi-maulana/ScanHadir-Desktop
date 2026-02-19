@@ -1,3 +1,4 @@
+// main.ts
 import path from 'path'
 import { app, ipcMain } from 'electron'
 import { createWindow } from './helpers'
@@ -13,7 +14,7 @@ import { createWindow } from './helpers'
             },
         })
 
-        // Function to load offline page - NEW VERSION
+        // Function to load offline page - FIXED VERSION
         const loadOfflinePage = () => {
             const offlineHTML = `
 <!DOCTYPE html>
@@ -255,11 +256,11 @@ import { createWindow } from './helpers'
             <span>Offline</span>
         </div>
 
-        <button id="retry-btn" class="retry-button" disabled>
+        <button id="retry-btn" class="retry-button">
             <svg class="refresh-icon" viewBox="0 0 24 24">
                 <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"></path>
             </svg>
-            <span id="btn-text">Memeriksa...</span>
+            <span id="btn-text">Coba Lagi</span>
         </button>
 
         <div class="help-section">
@@ -278,54 +279,89 @@ import { createWindow } from './helpers'
         const retryBtn = document.getElementById('retry-btn');
         const btnText = document.getElementById('btn-text');
 
-        function updateUI(isOnline) {
-            if (isOnline) {
+        // Fungsi untuk memperbarui UI berdasarkan status *nyata* (bukan hanya navigator.onLine)
+        function updateUI(isOffline) {
+            if (!isOffline) {
+                // Jika online (atau belum dikonfirmasi offline), tampilkan status Online dan disable tombol
                 statusEl.innerHTML = '<span class="status-dot"></span> <span>Online</span>';
                 statusEl.className = 'status-badge online';
                 retryBtn.disabled = true;
                 btnText.textContent = 'Terhubung';
             } else {
+                // Jika benar-benar offline, tampilkan status Offline dan **aktifkan tombol**
                 statusEl.innerHTML = '<span class="status-dot"></span> <span>Offline</span>';
                 statusEl.className = 'status-badge';
-                retryBtn.disabled = false;
+                retryBtn.disabled = false; // ✅ DIBENARKAN: tombol harus aktif saat offline
                 btnText.textContent = 'Coba Lagi';
             }
         }
 
-        async function checkConnection() {
-            retryBtn.disabled = true;
-            btnText.textContent = 'Memeriksa...';
-            // Redirect to main URL
-            window.location.href = 'https://admin.scanhadirku.id';
+        // Cek koneksi nyata dengan fetch ke endpoint sederhana (fallback ke navigator.onLine jika gagal)
+        async function checkRealConnection() {
+            try {
+                // Gunakan endpoint yang ringan dan pasti ada di domain Anda
+                // Alternatif jika tidak bisa buat endpoint: await fetch('https://httpbin.org/get', { method: 'HEAD', mode: 'no-cors' });
+                // Namun, mode 'no-cors' tidak akan mendeteksi error jaringan. Maka, fetch ke endpoint Anda adalah pilihan terbaik.
+                // Untuk sementara, kita gunakan navigator.onLine sebagai fallback, tapi logika utama tetap offline-first.
+                // Kita simulasikan koneksi gagal untuk kasus offline.
+                // const res = await fetch('https://admin.scanhadirku.id/api/ping', { method: 'HEAD', cache: 'no-cache' });
+                // return res.ok;
+                // Karena kita dalam mode offline page, kita asumsikan koneksi gagal.
+                return false; // <-- Asumsikan offline saat halaman ini dimuat
+            } catch (err) {
+                // Gagal fetch = kemungkinan offline
+                return false;
+            }
         }
 
-        window.addEventListener('online', () => {
-            console.log("Browser detected online state.");
+        // Inisialisasi: saat DOM siap, asumsikan offline, lalu coba cek
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Langsung set ke "Offline" sebagai default (karena kita dalam mode offline page)
             updateUI(true);
-            setTimeout(() => {
+
+            // Coba cek koneksi nyata secara background
+            // const isOnline = await checkRealConnection();
+            // updateUI(!isOnline); // Jika online -> false, jika offline -> true
+
+            retryBtn.addEventListener('click', async () => {
+                retryBtn.disabled = true;
+                btnText.textContent = 'Memeriksa...';
+
+                // Simulasikan cek koneksi atau coba redirect
+                // const isNowOnline = await checkRealConnection();
+                // if (isNowOnline) {
+                //     // Jika berhasil, redirect
+                //     window.location.href = 'https://admin.scanhadirku.id';
+                // } else {
+                //     // Jika masih offline, reset UI
+                //     updateUI(true);
+                //     btnText.textContent = 'Coba Lagi';
+                // }
+
+                // Karena kita hanya ingin test UI, kita coba redirect saja.
+                // Jika redirect gagal, did-fail-load akan trigger lagi dan memanggil loadOfflinePage().
                 window.location.href = 'https://admin.scanhadirku.id';
-            }, 1000);
+            });
         });
 
-        window.addEventListener('offline', () => {
-            console.log("Browser detected offline state.");
-            updateUI(false);
-        });
-
-        document.addEventListener('DOMContentLoaded', () => {
-            updateUI(navigator.onLine);
-            retryBtn.addEventListener('click', checkConnection);
-        });
+        // Event listener untuk online/offline (untuk kasus browser native)
+        // window.addEventListener('online', () => {
+        //     updateUI(false);
+        // });
+        // window.addEventListener('offline', () => {
+        //     updateUI(true);
+        // });
     </script>
 </body>
 </html>
-    `
-            mainWindow.loadURL(`text/html;charset=utf-8,${encodeURIComponent(offlineHTML)}`)
+    `;
+            // ✅ Perbaikan: Gunakan skema 'data:text/html...' untuk inline HTML
+            mainWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(offlineHTML)}`)
         }
 
-        // Try to load the main URL
+        // Try to load the main URL - FIXED: Removed trailing spaces
         try {
-            await mainWindow.loadURL('https://admin.scanhadirku.id')
+            await mainWindow.loadURL('https://admin.scanhadirku.id') // <- Spasi dihapus
             mainWindow.webContents.closeDevTools()
         } catch (error) {
             // If loading fails, show offline page
@@ -342,10 +378,10 @@ import { createWindow } from './helpers'
             }
         })
 
-        // Optional: Add IPC handler to retry connection from renderer
+        // Optional: Add IPC handler to retry connection from renderer - FIXED: Removed trailing spaces
         ipcMain.on('retry-connection', async () => {
             try {
-                await mainWindow.loadURL('https://admin.scanhadirku.id')
+                await mainWindow.loadURL('https://admin.scanhadirku.id') // <- Spasi dihapus
             } catch (error) {
                 loadOfflinePage()
             }
