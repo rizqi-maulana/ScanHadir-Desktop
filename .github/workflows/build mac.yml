@@ -1,0 +1,33 @@
+name: Build Mac
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-mac:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Compile main process
+        run: npx tsc --project main/tsconfig.json
+
+      - name: Check app folder
+        run: ls -la app/
+
+      - name: Build Mac
+        run: npx electron-builder --mac
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ScanHadir-mac
+          path: dist/*.dmg
