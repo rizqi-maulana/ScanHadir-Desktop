@@ -1,9 +1,9 @@
 {
   "private": true,
-  "name": "my-nextron-app",
-  "description": "My application description",
+  "name": "ScanHadir",
+  "description": "ScanHadir",
   "version": "1.0.0",
-  "author": "Yoshihide Shiono <shiono.yoshihide@gmail.com>",
+  "author": "ScanHadir <maulanarizq26@gmail.com>",
   "main": "app/background.js",
   "scripts": {
     "dev": "nextron",
