@@ -15,7 +15,7 @@ jobs:
           node-version: 18
 
       - name: Install dependencies
-        run: npm install
+        run: bun install
 
       - name: Compile main process
         run: npx tsc --project main/tsconfig.json
